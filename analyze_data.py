@@ -29,6 +29,7 @@ if __name__ == '__main__':
     pyplot.scatter(x,y)
     
     pyplot.show()
+    
     '''
     import matplotlib.pyplot as plt
     import numpy as np
