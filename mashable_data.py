@@ -165,31 +165,4 @@ if __name__ == '__main__':
     print train
     train_M, test_M = getMashableMatrix(train, test)
     print train_M
-    '''
-    for i, inp in enumerate(inpts):
-        res.append((i, float(inp.strip())))
-    print len(res)
-    lessThan = filter(lambda x:x[1] < 1.0, res)
-    greaterThan = filter(lambda x:x[1]>0.5, res)
-    zeroToNegative5 = filter(lambda x:x[1] > -0.5 and x[1]<0.0, res)
-    zeroTo5 = filter(lambda x:x[1] > 0.0 and x<0.5, res)
-    print lessThan
-    y = numpy.array(map(lambda x:x[1], res))
-    x = numpy.array(map(lambda x:x[0], res))
-    pyplot.plot(x,y)
     
-    pyplot.show()
-    
-    import matplotlib.pyplot as plt
-    import numpy as np
-    import matplotlib.mlab as mlab
-    import math
-    
-    mean = 3395.380184
-    variance = 135182573.7
-    sigma = math.sqrt(variance)
-    x = np.linspace(1,843300,500)
-    plt.plot(x,mlab.normpdf(x,mean,sigma))
-    
-    plt.show()
-    '''
