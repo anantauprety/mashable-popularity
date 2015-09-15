@@ -1,15 +1,14 @@
 '''
 Created on Sep 13, 2015
 
+
 @author: ananta
 '''
 from sklearn.tree import DecisionTreeClassifier
-from sklearn import metrics
 import logging
 from mashable_data import getMashableData, getMashableMatrix, SimpleTimer
 from sklearn import tree
 from sklearn.learning_curve import learning_curve
-from sklearn.metrics import accuracy_score
 from plot_learning_curve import plot_learning_curve
 logger = logging.getLogger('training')
 
