@@ -120,7 +120,7 @@ def getMashableData(size=10, ratio=0.2):
         dataTest = mashData.fetchData(subset='test', n_sample=int(size*ratio))
     return dataTrain, dataTest
 
-def getMashableMatrix(dataTrain, dataTest):
+def getMashableMatrix(dataTrain, dataTest, chooseK='all'):
     
     print 'calculating training matrix'
     X_train = []
@@ -143,7 +143,7 @@ def getMashableMatrix(dataTrain, dataTest):
     print 'train', len(X_train), len(X_train[0])
     print 'test', len(X_test), len(X_test[0])
     
-    kBest = SelectKBest(f_classif, k='all')
+    kBest = SelectKBest(f_classif, k=chooseK)
     
     X_train = kBest.fit_transform(X_train, dataTrain.target)
     X_test = kBest.transform(X_test)
@@ -163,6 +163,6 @@ def getMashableMatrix(dataTrain, dataTest):
 if __name__ == '__main__':
     train, test = getMashableData(500)
     print train
-    train_M, test_M = getMashableMatrix(train, test)
+    train_M, test_M = getMashableMatrix(train, test, chooseK='all')
     print train_M
     

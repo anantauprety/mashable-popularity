@@ -10,7 +10,7 @@ from pybrain.structure.modules   import SoftmaxLayer, TanhLayer, SigmoidLayer, L
 from pybrain.tools.shortcuts     import buildNetwork
 from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.utilities           import percentError
-from pybrain.structure import RecurrentNetwork, FullConnection
+from pybrain.structure import RecurrentNetwork, FullConnection, FeedForwardNetwork
 
 def getDataSetFromTfidf(tfidf, target):
     ds = ClassificationDataSet(tfidf.shape[1], nb_classes=3, class_labels=['Unpopular','Neutral','Popular'])
@@ -39,15 +39,14 @@ def runNeuralSimulation(dataTrain, dataTest, train_M, test_M):
         trainer = BackpropTrainer( net, dataset=trainDS, momentum=0.01, verbose=True, weightdecay=0.01, batchlearning=True)
     '''
     
-    net = RecurrentNetwork()
-    net.addInputModule(LinearLayer(trainDS.indim, name='in'))
-    net.addModule(SigmoidLayer(trainDS.indim/2, name='hidden'))
-    net.addModule(SigmoidLayer(trainDS.indim/4, name='hidden2'))
+    net = FeedForwardNetwork()
+    net.addInputModule(LinearLayer(54, name='in'))
+    net.addModule(SigmoidLayer(18, name='hidden'))
     net.addOutputModule(SoftmaxLayer(3, name='out'))
     net.addConnection(FullConnection(net['in'], net['hidden'], name='c1'))
     net.addConnection(FullConnection(net['hidden'], net['out'], name='c2'))
-    net.addRecurrentConnection(FullConnection(net['hidden'], net['hidden'], name='c3'))
-    net.addRecurrentConnection(FullConnection(net['hidden2'], net['hidden'], name='c4'))
+#     net.addRecurrentConnection(FullConnection(net['hidden'], net['hidden'], name='c3'))
+#     net.addRecurrentConnection(FullConnection(net['hidden2'], net['hidden'], name='c4'))
     net.sortModules()
     trainer = BackpropTrainer( net, dataset=trainDS, momentum=0.01, verbose=True, weightdecay=0.01)
     
@@ -80,6 +79,6 @@ def runNeuralSimulation(dataTrain, dataTest, train_M, test_M):
 if __name__ == '__main__':
     dataSize = 1000
     dataTrain, dataTest = getMashableData(dataSize)
-    train_M, test_M = getMashableMatrix(dataTrain, dataTest)
+    train_M, test_M = getMashableMatrix(dataTrain, dataTest, 54)
     runNeuralSimulation(dataTrain, dataTest, train_M, test_M)
     
