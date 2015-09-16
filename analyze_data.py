@@ -19,18 +19,27 @@ if __name__ == '__main__':
                     break
                 line = inpts.split(',')[:-2] # remove the popularity score before feeding it in
                 tar = float(line[-1])
-                if tar < 0.5:
-                    res.append(tar) # remove the title url
+                
+                res.append(tar) # remove the title url
     
     print len(res)
-    
+    first = -0.225
+    second = 0.1
+    unpop = filter(lambda x:x < first, res)
+    print len(unpop)
+    print len(unpop) * 1.0 / len(res) 
+    neutral = filter(lambda x:x> first and x < second, res)
+    print len(neutral) * 1.0 / len(res)
+    pop = filter(lambda x: x > second, res)
+    print len(pop) * 1.0 / len(res)
+    '''
     y = numpy.random.rand(len(res))
     x = numpy.array(res)
     pyplot.scatter(x,y)
     
     pyplot.show()
     
-    '''
+    
     import matplotlib.pyplot as plt
     import numpy as np
     import matplotlib.mlab as mlab

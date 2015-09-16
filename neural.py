@@ -35,10 +35,10 @@ def runNeuralSimulation(dataTrain, dataTest, train_M, test_M):
     print 'input layer', trainDS.indim
     '''
     with SimpleTimer('time to train', outFile):
-        net = buildNetwork(trainDS.indim, trainDS.indim/2, trainDS.indim/4, 3, hiddenclass=TanhLayer, outclass=SoftmaxLayer)
+        net = buildNetwork(54, 18, 3, hiddenclass=SigmoidLayer, outclass=SoftmaxLayer)
         trainer = BackpropTrainer( net, dataset=trainDS, momentum=0.01, verbose=True, weightdecay=0.01, batchlearning=True)
-    '''
     
+    '''
     net = FeedForwardNetwork()
     net.addInputModule(LinearLayer(54, name='in'))
     net.addModule(SigmoidLayer(18, name='hidden'))
@@ -46,8 +46,8 @@ def runNeuralSimulation(dataTrain, dataTest, train_M, test_M):
     net.addConnection(FullConnection(net['in'], net['hidden'], name='c1'))
     net.addConnection(FullConnection(net['hidden'], net['out'], name='c2'))
 #     net.addRecurrentConnection(FullConnection(net['hidden'], net['hidden'], name='c3'))
-#     net.addRecurrentConnection(FullConnection(net['hidden2'], net['hidden'], name='c4'))
     net.sortModules()
+    
     trainer = BackpropTrainer( net, dataset=trainDS, momentum=0.01, verbose=True, weightdecay=0.01)
     
     outFile.write('%s \n' % (net.__str__()))
@@ -77,7 +77,7 @@ def runNeuralSimulation(dataTrain, dataTest, train_M, test_M):
         outFile.write('%s %d \n' % (dataTest.data[i], dataTest.target[i]))
     
 if __name__ == '__main__':
-    dataSize = 1000
+    dataSize = 10000
     dataTrain, dataTest = getMashableData(dataSize)
     train_M, test_M = getMashableMatrix(dataTrain, dataTest, 54)
     runNeuralSimulation(dataTrain, dataTest, train_M, test_M)

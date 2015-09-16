@@ -10,6 +10,7 @@ from mashable_data import getMashableData, getMashableMatrix, SimpleTimer
 from sklearn import tree
 from sklearn.learning_curve import learning_curve
 from plot_learning_curve import plot_learning_curve
+from sklearn.metrics import confusion_matrix
 logger = logging.getLogger('training')
 
 def printPdf(clf, dataTrain):
@@ -59,6 +60,12 @@ def runDecisionTreeSimulation(dataTrain, dataTest, train_M, test_M):
     bestClf = DecisionTreeClassifier(max_depth=bestDepth)
     bestClf.fit(train_M, dataTrain.target)
     predicted = bestClf.predict(test_M)
+    trainPredict = bestClf.predict(train_M)
+    print len(filter(lambda x:x==0, dataTrain.target)), len(filter(lambda x:x==0, trainPredict))
+    print len(filter(lambda x:x==1, dataTrain.target)), len(filter(lambda x:x==1, trainPredict))
+    print len(filter(lambda x:x==2, dataTrain.target)), len(filter(lambda x:x==2, trainPredict))
+    print confusion_matrix(trainPredict, dataTrain.target)
+    print confusion_matrix(predicted, dataTest.target)
     
     results = predicted == dataTest.target
     wrong = []
@@ -72,7 +79,7 @@ def runDecisionTreeSimulation(dataTrain, dataTest, train_M, test_M):
     plot_learning_curve(bestClf, 'decision tree after pruning from %d to %d depth' % (initHeight, bestDepth), train_M, dataTrain.target, cv=5, n_jobs=4)
     
 if __name__ == '__main__':
-    dataSize = 10000
+    dataSize = 50000
     dataTrain, dataTest = getMashableData(dataSize)
     train_M, test_M = getMashableMatrix(dataTrain, dataTest)
     runDecisionTreeSimulation(dataTrain, dataTest, train_M, test_M)

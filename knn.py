@@ -60,7 +60,7 @@ def runKNNSimulation(dataTrain, dataTest, train_M, test_M):
     plot_learning_curve(bestClf, 'knn with %d neighbors' % bestNeighbors, train_M, dataTrain.target, cv=5, n_jobs=4)
     
 if __name__ == '__main__':
-    dataSize = 1000
+    dataSize = 30000
     dataTrain, dataTest = getMashableData(dataSize)
     train_M, test_M = getMashableMatrix(dataTrain, dataTest)
     runKNNSimulation(dataTrain, dataTest, train_M, test_M)

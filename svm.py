@@ -14,7 +14,7 @@ def runSVMSimulation(dataTrain, dataTest, train_M, test_M):
     print 'running svm code'
     outFile.write('train==> %d, %d \n'%(train_M.shape[0],train_M.shape[1]))
     outFile.write('test==>  %d, %d \n'%(test_M.shape[0],test_M.shape[1]))
-    kernel = "linear"
+    kernel = "rbf"
     with SimpleTimer('time to train', outFile):
 #         clf = SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3, n_iter=30, random_state=42)
 #         clf = LinearSVC(C=1.0)
@@ -63,7 +63,7 @@ def runSVMSimulation(dataTrain, dataTest, train_M, test_M):
     '''
         
 if __name__ == '__main__':
-    dataSize = 1000
+    dataSize = 30000
     dataTrain, dataTest = getMashableData(dataSize)
-    train_M, test_M = getMashableMatrix(dataTrain, dataTest)
+    train_M, test_M = getMashableMatrix(dataTrain, dataTest, 30)
     runSVMSimulation(dataTrain, dataTest, train_M, test_M)

@@ -58,8 +58,8 @@ class MashableData(object):
     def dummyCoding(self, num):
 #         firstQuartile = -0.211
 #         secondQuartile = -0.05
-        firstQuartile = -0.211
-        secondQuartile = -0.05
+        firstQuartile = -0.225
+        secondQuartile = 0.1
         if num > firstQuartile and num < secondQuartile:
             return 1 # neutral
         if num < firstQuartile:
@@ -70,6 +70,7 @@ class MashableData(object):
         
     def getData(self, fileName):
         res = []
+        neutralCount = 0
         with open(fileName,'r') as inFile:
             inpts = inFile.readline()
             print inpts
@@ -84,9 +85,13 @@ class MashableData(object):
                 self.dataDict[j] = line[0]
                 j += 1
                 tar = float(line[-1])
-                if tar < 1:
-                    tar = self.dummyCoding(tar)
-                    res.append((tar,line[:-2])) # remove the title url
+                tar = self.dummyCoding(tar)
+                if tar==1:
+                    neutralCount += 1
+                    if neutralCount < 4500:
+                        res.append((tar,line[:-2])) # remove the title url
+                else:
+                    res.append((tar,line[:-2]))
             shuffle(res)
             size = len(res)
         print 'total data size %d' % len(res)
@@ -116,6 +121,7 @@ def getMashableData(size=10, ratio=0.2):
         dataTrain = mashData.fetchData(subset='train', n_sample=int(size-size*ratio))
         print '%.3f unpopular on training data' % (len(filter(lambda x:x == 0, dataTrain.target)) * 1.0 / len(dataTrain.target) * 100)
         print '%.3f neutral on training data' % (len(filter(lambda x:x == 1, dataTrain.target)) * 1.0 / len(dataTrain.target) * 100)
+        print '%.3f popular on training data' % (len(filter(lambda x:x == 2, dataTrain.target)) * 1.0 / len(dataTrain.target) * 100)
     with SimpleTimer('time to fetch testing data'):
         dataTest = mashData.fetchData(subset='test', n_sample=int(size*ratio))
     return dataTrain, dataTest

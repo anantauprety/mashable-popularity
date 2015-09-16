@@ -64,7 +64,7 @@ def runBoosting(dataTrain, dataTest, train_M, test_M):
     plot_learning_curve(bestClf, 'boosting with %d trees' % bestNum, train_M, dataTrain.target, cv=5, n_jobs=4)
     
 if __name__ == '__main__':
-    dataSize = 10000
+    dataSize = 30000
     dataTrain, dataTest = getMashableData(dataSize)
     train_M, test_M = getMashableMatrix(dataTrain, dataTest)
     runBoosting(dataTrain, dataTest, train_M, test_M)
