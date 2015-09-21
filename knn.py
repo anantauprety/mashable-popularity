@@ -5,17 +5,18 @@ Created on Sep 13, 2015
 '''
 
 from sklearn.neighbors import KNeighborsClassifier
-from mashable_data import getMashableData, getMashableMatrix, SimpleTimer
+from mashable_data import getMashableData, getMashableMatrix, SimpleTimer, getPickeledData, outputScores
 from plot_learning_curve import plot_learning_curve
 import numpy
 
-def runKNNSimulation(dataTrain, dataTest, train_M, test_M):
-    outFile = open('knnLog.txt','a')
+def runKNNSimulation(dataTrain, dataTest, holdout, train_M, test_M, hold_M):
+    outFile = open('knnLog25.txt','a')
     print 'running mashable knn simulation'
     outFile.write('train==> %d, %d \n'%(train_M.shape[0],train_M.shape[1]))
     outFile.write('test==>  %d, %d \n'%(test_M.shape[0],test_M.shape[1]))
     with SimpleTimer('time to train', outFile):
         clf = KNeighborsClassifier(weights='distance', ).fit(train_M, dataTrain.target)
+    plot_learning_curve(clf, 'knn with %d neighbors' , train_M, dataTrain.target, cv=5, n_jobs=4)
     
     baseScore = clf.score(test_M, dataTest.target)
     baseParams = clf.get_params(True)
@@ -28,17 +29,26 @@ def runKNNSimulation(dataTrain, dataTest, train_M, test_M):
         for neighbors in range(2,baseNeighbors * 10):
 #             print 'training for neighbors %d' % neighbors
             clf = KNeighborsClassifier(n_neighbors=neighbors, weights='distance').fit(train_M, dataTrain.target)
-            score = clf.score(test_M, dataTest.target)
+            score = clf.score(hold_M, holdout.target)
             res.append((score, neighbors))
             outFile.write('%d %.3f \n' % (neighbors, score))
     res = sorted(res, key=lambda x:x[0], reverse=True)
     print res[:5]
     bestNeighbors = res[0][1]
     print ('best number of neighbors is %d' % bestNeighbors)
-    outFile.write('best number of neighbors is %d  and score is %d\n' % (bestNeighbors, res[0][0]))
+    outFile.write('best number of neighbors is %d  and score is %.3f\n' % (bestNeighbors, res[0][0]))
+    
     bestClf = KNeighborsClassifier(n_neighbors=bestNeighbors, weights='distance')
     bestClf.fit(train_M, dataTrain.target)
+    
     predicted = bestClf.predict(test_M)
+    trainPredict = bestClf.predict(train_M)
+    print 'testing score'
+    outFile.write('testing score')
+    outputScores(dataTest.target, predicted, outFile)
+    print 'training score'
+    outFile.write('testing score')
+    outputScores(dataTrain.target, trainPredict, outFile)
     
     results = predicted == dataTest.target
     print numpy.mean(results)
@@ -60,7 +70,5 @@ def runKNNSimulation(dataTrain, dataTest, train_M, test_M):
     plot_learning_curve(bestClf, 'knn with %d neighbors' % bestNeighbors, train_M, dataTrain.target, cv=5, n_jobs=4)
     
 if __name__ == '__main__':
-    dataSize = 30000
-    dataTrain, dataTest = getMashableData(dataSize)
-    train_M, test_M = getMashableMatrix(dataTrain, dataTest)
-    runKNNSimulation(dataTrain, dataTest, train_M, test_M)
+    train, test, holdout, train_M, test_M, hold_M = getPickeledData(fileName='sample.p')
+    runKNNSimulation(train, test, holdout, train_M, test_M, hold_M)

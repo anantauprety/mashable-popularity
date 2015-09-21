@@ -6,7 +6,7 @@ Created on Sep 13, 2015
 '''
 from sklearn.tree import DecisionTreeClassifier
 import logging
-from mashable_data import getMashableData, getMashableMatrix, SimpleTimer
+from mashable_data import getMashableData, getMashableMatrix, SimpleTimer, getPickeledData, outputScores
 from sklearn import tree
 from sklearn.learning_curve import learning_curve
 from plot_learning_curve import plot_learning_curve
@@ -22,9 +22,9 @@ def printPdf(clf, dataTrain):
     graph.write_pdf('sentiment.pdf')
     print dataTrain.data[0]
 
-def runDecisionTreeSimulation(dataTrain, dataTest, train_M, test_M):
+def runDecisionTreeSimulation(dataTrain, dataTest, holdout, train_M, test_M, hold_M):
     print 'running decision tree'
-    outFile = open('decisionTreeLog.txt','a')
+    outFile = open('decisionTreeLog30.txt','a')
     
     
     outFile.write('train==> %d, %d \n'%(train_M.shape[0],train_M.shape[1]))
@@ -43,7 +43,7 @@ def runDecisionTreeSimulation(dataTrain, dataTest, train_M, test_M):
         for height in range(initHeight, 2 , -1):
 #             print 'training for height %d' % height
             clf = DecisionTreeClassifier(max_depth=height).fit(train_M, dataTrain.target)
-            score = clf.score(test_M, dataTest.target)
+            score = clf.score(hold_M, holdout.target)
             res.append((score, height))
             outFile.write('%d %.3f \n' % (height, score))
     res = sorted(res, key=lambda x:x[0], reverse=True)
@@ -56,7 +56,7 @@ def runDecisionTreeSimulation(dataTrain, dataTest, train_M, test_M):
     '''
     bestDepth = res[0][1]
     print ('best height is %d' % bestDepth)
-    outFile.write('best depth is %d  and score is %d \n' % (bestDepth, res[0][0]))
+    outFile.write('best depth is %d  and score is %.3f \n' % (bestDepth, res[0][0]))
     bestClf = DecisionTreeClassifier(max_depth=bestDepth)
     bestClf.fit(train_M, dataTrain.target)
     predicted = bestClf.predict(test_M)
@@ -64,8 +64,14 @@ def runDecisionTreeSimulation(dataTrain, dataTest, train_M, test_M):
     print len(filter(lambda x:x==0, dataTrain.target)), len(filter(lambda x:x==0, trainPredict))
     print len(filter(lambda x:x==1, dataTrain.target)), len(filter(lambda x:x==1, trainPredict))
     print len(filter(lambda x:x==2, dataTrain.target)), len(filter(lambda x:x==2, trainPredict))
-    print confusion_matrix(trainPredict, dataTrain.target)
-    print confusion_matrix(predicted, dataTest.target)
+    
+    print 'testing score'
+    outFile.write('testing score')
+    outputScores(dataTest.target, predicted, outFile)
+    
+    print 'training score'
+    outFile.write('testing score')
+    outputScores(dataTrain.target, trainPredict, outFile)
     
     results = predicted == dataTest.target
     wrong = []
@@ -79,7 +85,8 @@ def runDecisionTreeSimulation(dataTrain, dataTest, train_M, test_M):
     plot_learning_curve(bestClf, 'decision tree after pruning from %d to %d depth' % (initHeight, bestDepth), train_M, dataTrain.target, cv=5, n_jobs=4)
     
 if __name__ == '__main__':
-    dataSize = 50000
-    dataTrain, dataTest = getMashableData(dataSize)
-    train_M, test_M = getMashableMatrix(dataTrain, dataTest)
-    runDecisionTreeSimulation(dataTrain, dataTest, train_M, test_M)
+    dataSize = 10000
+#     dataTrain, dataTest = getMashableData(dataSize)
+#     train_M, test_M = getMashableMatrix(dataTrain, dataTest)
+    train, test, holdout, train_M, test_M, hold_M = getPickeledData(fileName='sample.p')
+    runDecisionTreeSimulation(train, test, holdout, train_M, test_M, hold_M)

@@ -74,7 +74,7 @@ class MashableData(object):
             b.append(element)
         return b
     
-    def __init__(self, fileName='OnlineNewsPopularity.csv'):
+    def __init__(self, fileName='mashable.csv'):
         self.names = ['unpopular','neutral','popular']
         self.dataDict = {}
         self.train, self.test, self.holdout = self.getData(fileName)
@@ -85,13 +85,11 @@ class MashableData(object):
 #         secondQuartile = -0.05
         firstQuartile = -0.225
         secondQuartile = 0.1
-        if num > firstQuartile and num < secondQuartile:
-            return 1 # neutral
-        if num < firstQuartile:
-            return 0 # unpopular
-        if num > secondQuartile:
-            return 2
-        
+        if num == 'unpopular':
+            return 0 # neutral
+        elif num == 'popular':
+            return 1 # unpopular
+       
         
     def getData(self, fileName):
         res = []
@@ -104,19 +102,16 @@ class MashableData(object):
                 inpts = inFile.readline()
                 if inpts.strip() == '':
                     break
-                line = inpts.split(',')[:-2] # remove the popularity score before feeding it in
-                if len(line) != 62:
+                line = inpts.split(',') # remove the popularity score before feeding it in
+                if len(line) != 59:
                     print j                
                 self.dataDict[j] = line[0]
                 j += 1
-                tar = float(line[-1])
-                tar = self.dummyCoding(tar)
-                if tar==1:
-                    neutralCount += 1
-                    if neutralCount < 4500:
-                        res.append((tar,line[:-2])) # remove the title url
-                else:
-                    res.append((tar,line[:-2]))
+                tar = line[-1]
+                tar = self.dummyCoding(tar.strip())
+                
+                res.append((tar,line[:-2])) # remove the title url
+                
             shuffle(res)
             
         print 'total data size %d' % len(res)
@@ -224,10 +219,10 @@ def printStats(target):
 if __name__ == '__main__':
     train, test, holdout = getMashableData(30000)
     print len(train.data), len(test.data), len(holdout.data)
-#     train_M, test_M, hold_M = getMashableMatrix(train, test, holdout, chooseK=54)
-#     print len(train_M), len(test_M), len(hold_M)
-#     pickleData(train, test, holdout, train_M, test_M, hold_M, fileName='sample54.p')
-    train, test, holdout, train_M, test_M, hold_M = getPickeledData(fileName='sample54.p')
+    train_M, test_M, hold_M = getMashableMatrix(train, test, holdout, chooseK='all')
+    print len(train_M), len(test_M), len(hold_M)
+    pickleData(train, test, holdout, train_M, test_M, hold_M, fileName='sample.p')
+    train, test, holdout, train_M, test_M, hold_M = getPickeledData(fileName='sample.p')
     print len(train.target), len(test.target), len(holdout.target), len(train_M)
     print 'training'
     printStats(train.target)

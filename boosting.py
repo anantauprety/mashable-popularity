@@ -11,12 +11,13 @@ Created on Sep 12, 2015
 '''
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
-from mashable_data import getMashableData, getMashableMatrix, SimpleTimer
+from mashable_data import getMashableData, getMashableMatrix, SimpleTimer, getPickeledData, outputScores
 from plot_learning_curve import plot_learning_curve
 
 def tryVariousHyperParams(dataTrain, dataTest, train_M, test_M, outFile):
-    params = [(15,500),(20,500),(25,800),(10,8000),(12,3000),(8,3000),(4,5000)]
+    params = [(8,200),(8,400),(8,600),(8,800),(8,1000),(8,1200),(8,1600),(8,2000)]
     res = []
+    outFile.write('\n changing num_estimators \n')
     for depth, num in params:
         outFile.write('depth %d, num %d \n'%(depth, num))
         with SimpleTimer('time to train', outFile):
@@ -27,20 +28,20 @@ def tryVariousHyperParams(dataTrain, dataTest, train_M, test_M, outFile):
         score = clf.score(test_M, dataTest.target)
         print depth, num
         print score
-        outFile.write('score %d \n'%(score))
+        outFile.write('score %.3f \n'%(score))
         res.append((score, depth, num))
     res = sorted(res, key=lambda x:x[0])
     return res[0]
 
-def runBoosting(dataTrain, dataTest, train_M, test_M):
+def runBoosting(dataTrain, dataTest, holdout, train_M, test_M, hold_M):
     outFile = open('boostingLog.txt','a')
     print 'running boosting algo'
     outFile.write('train==> %d, %d \n'%(train_M.shape[0],train_M.shape[1]))
     outFile.write('test==>  %d, %d \n'%(test_M.shape[0],test_M.shape[1]))
     # takes a very long time to run
 #     score, bestDepth, num = tryVariousHyperParams(dataTrain, dataTest, train_M, test_M)
-    bestDepth = 4
-    bestNum = 5000
+    bestDepth = 7
+    bestNum = 10000
     with SimpleTimer('time to train', outFile):
         estimator = DecisionTreeClassifier(max_depth=bestDepth)
         bestClf = AdaBoostClassifier(base_estimator=estimator,  n_estimators=bestNum)
@@ -52,6 +53,16 @@ def runBoosting(dataTrain, dataTest, train_M, test_M):
     bestClf.fit(train_M, dataTrain.target)
     predicted = bestClf.predict(test_M)
     
+    trainPredict = bestClf.predict(train_M)
+    
+    print 'testing score'
+    outFile.write('testing score')
+    outputScores(dataTest.target, predicted, outFile)
+    
+    print 'training score'
+    outFile.write('training score')
+    outputScores(dataTrain.target, trainPredict, outFile)
+    
     results = predicted == dataTest.target
     res = []
     for i in range(len(results)):
@@ -61,10 +72,12 @@ def runBoosting(dataTrain, dataTest, train_M, test_M):
     for i in res[:10]:
         print dataTest.data[i], dataTest.target[i]
         outFile.write('%s %d \n' % (dataTest.data[i], dataTest.target[i]))
-    plot_learning_curve(bestClf, 'boosting with %d trees' % bestNum, train_M, dataTrain.target, cv=5, n_jobs=4)
+    plot_learning_curve(bestClf, 'boosting with %d trees' % bestNum, train_M, dataTrain.target, cv=3, n_jobs=4)
     
 if __name__ == '__main__':
-    dataSize = 30000
-    dataTrain, dataTest = getMashableData(dataSize)
-    train_M, test_M = getMashableMatrix(dataTrain, dataTest)
-    runBoosting(dataTrain, dataTest, train_M, test_M)
+#     dataSize = 30000
+    train, test, holdout, train_M, test_M, hold_M = getPickeledData(fileName='sample.p')
+    runBoosting(train, test, holdout, train_M, test_M, hold_M)
+    #outFile = open('boostingLogHyper.txt','a')
+    #tryVariousHyperParams(train, test,train_M, test_M,outFile)
+    
