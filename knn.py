@@ -72,3 +72,40 @@ def runKNNSimulation(dataTrain, dataTest, holdout, train_M, test_M, hold_M):
 if __name__ == '__main__':
     train, test, holdout, train_M, test_M, hold_M = getPickeledData(fileName='sample.p')
     runKNNSimulation(train, test, holdout, train_M, test_M, hold_M)
+    '''
+    import pandas
+    from numpy import dtype,array
+    df = pandas.read_csv('dress.csv')
+    # print df.info()
+    # print df.describe()
+    
+    dt =  df.dtypes
+    newCols = {}
+    for t in dt.iteritems():
+         if t[1] == dtype('object'):
+             newCols[t[0]] = pandas.factorize(df[t[0]])[0]
+         else:
+             newCols[t[0]] = df[t[0]].values
+    # print objs
+    dfN = pandas.DataFrame(newCols)
+    dfN = dfN.drop(['Recommendation','Dress_ID','Size'],axis=1)
+    val = dfN.values
+    print dfN.columns
+    target = df['Recommendation']
+    target_names = target.unique().astype(str)
+    target = target.values.astype(int)
+    from sklearn.datasets.base import Bunch
+    from sklearn.decomposition import PCA,KernelPCA,RandomizedPCA,FastICA
+    # clf = PCA(n_components=10)
+    # clf = RandomizedPCA(n_components=5,whiten=True)
+    clf = FastICA(n_components=10,whiten=True)
+    # kernel = "linear" | "poly" | "rbf" | "sigmoid" | "cosine" 
+    # clf = KernelPCA(n_components=2,kernel='sigmoid')
+    print clf
+    val = clf.fit_transform(val)
+    iris = Bunch()
+    iris.data = val
+    iris.target = target
+    iris.target_names = target_names
+    em(iris)
+    '''
